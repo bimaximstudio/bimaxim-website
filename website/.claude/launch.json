@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Static Site (PowerShell)",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", ".claude\\serve.bat"],
+      "port": 3000
+    },
+    {
+      "name": "Static Site (Python)",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "3000"],
+      "port": 3000
+    },
+    {
+      "name": "Static Site (npx serve)",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "3000", "."],
+      "port": 3000
+    }
+  ]
+}

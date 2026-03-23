@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "Bash(where python3:*)",
+      "Bash(where python:*)",
+      "Bash(where node:*)",
+      "Bash(where npx:*)",
+      "Bash(where php:*)",
+      "Bash(python3 -c \"print\\(''ok''\\)\")",
+      "Bash(where wsl:*)",
+      "Bash(where git:*)",
+      "Bash(where curl:*)",
+      "Bash(where powershell:*)",
+      "Bash(node)",
+      "Bash(php)",
+      "Bash(ruby\" 2>nul; ls \"C:Program FilesGitusrbin\"\")",
+      "Bash(netstat -ano)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/photos/2025-09-28-Zs%C3%A1mb%C3%A9k-008.jpg)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"http://localhost:3000/photos/2025-09-28-Zs%C3%A1mb%C3%A9k-008.jpg\")",
+      "Bash(curl -sv \"http://localhost:3000/index.html\")",
+      "Bash(curl -sv \"http://localhost:3000/photos/2025-09-28-Zsambek-008.jpg\")",
+      "Bash(powershell -NoProfile:*)",
+      "Bash(curl -s -o /dev/null -w \"photo:%{http_code} logo:%{http_code2}\" --next \"http://localhost:3000/photos/2025-09-28-Zs%C3%A1mb%C3%A9k-008.jpg\" --next \"http://localhost:3000/logos/mupa.svg\")",
+      "Bash(curl -s -o /dev/null -w \"photo:%{http_code}\" \"http://localhost:3000/photos/2025-09-28-Zs%C3%A1mb%C3%A9k-008.jpg\")",
+      "Bash(curl -s \"http://localhost:3000/photos/2025-09-28-Zs%C3%A1mb%C3%A9k-008.jpg\")",
+      "Bash(xxd)"
+    ]
+  }
+}
