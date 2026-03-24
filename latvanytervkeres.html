@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>bimaxim — Ingyenes látványterv kérés</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #C9A84C;
+      --gold-dim: rgba(201,168,76,0.10);
+      --gold-border: rgba(201,168,76,0.25);
+      --black: #000;
+      --surface: #0d0d0d;
+      --text: #f0ede8;
+      --muted: rgba(240,237,232,0.5);
+    }
+
+    html { font-size: 18px; }
+
+    body {
+      background: var(--black);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 300;
+      height: 100dvh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ── TOP BAR ── */
+    #topbar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(20px,4vw,60px);
+      height: 64px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      flex-shrink: 0;
+    }
+    .logo-img {
+      height: 18px;
+      width: auto;
+      filter: brightness(0) invert(1);
+    }
+    .step-meta {
+      font-size: 0.82rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .lang { display: flex; align-items: center; gap: 2px; }
+    .lbtn {
+      background: none; border: none; cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.65rem; font-weight: 500;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted); padding: 5px 8px; transition: color 0.2s;
+    }
+    .lbtn.on { color: var(--gold); }
+    .lsep { color: var(--muted); font-size: 0.7rem; opacity: 0.35; }
+
+    /* ── PROGRESS BAR ── */
+    #progress-bar {
+      height: 2px;
+      background: rgba(255,255,255,0.07);
+      flex-shrink: 0;
+    }
+    #progress-fill {
+      height: 100%;
+      background: var(--gold);
+      transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+      width: 33.33%;
+    }
+
+    /* ── MAIN SPLIT ── */
+    /* Wide screens: image dominates (65-70%), form is compact sidebar */
+    /* Narrow screens: equal 50/50 split */
+    #split {
+      flex: 1;
+      display: grid;
+      grid-template-columns: clamp(50%, 66vw, 72%) 1fr;
+      overflow: hidden;
+      min-height: 0;
+    }
+    @media (max-width: 1000px) {
+      #split { grid-template-columns: 50% 50%; }
+    }
+
+    /* ── LEFT: IMAGE ── */
+    #img-col {
+      position: relative;
+      overflow: hidden;
+    }
+    .step-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+    .step-img.active { opacity: 1; }
+    /* dark overlay for readability */
+    #img-col::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.55) 100%);
+      pointer-events: none;
+    }
+    /* step indicator over image */
+    .img-step-label {
+      position: absolute;
+      bottom: 32px;
+      left: 32px;
+      z-index: 2;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+    }
+    .img-step-dots {
+      position: absolute;
+      bottom: 32px;
+      right: 32px;
+      z-index: 2;
+      display: flex;
+      gap: 8px;
+    }
+    .img-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      transition: background 0.3s;
+    }
+    .img-dot.on { background: var(--gold); }
+
+    /* ── RIGHT: FORM ── */
+    #form-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 40px clamp(28px,4vw,64px);
+      overflow-y: auto;
+    }
+
+    /* Steps wrapper */
+    #steps-wrap {
+      position: relative;
+    }
+
+    .step {
+      display: none;
+      flex-direction: column;
+    }
+    .step.active {
+      display: flex;
+      animation: fadeSlideIn 0.4s ease forwards;
+    }
+    .step.out {
+      animation: fadeSlideOut 0.3s ease forwards;
+    }
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateX(24px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes fadeSlideOut {
+      from { opacity: 1; transform: translateX(0); }
+      to   { opacity: 0; transform: translateX(-20px); }
+    }
+
+    .step-number {
+      font-size: 0.82rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+    .step-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(1.6rem,2.4vw,2.4rem);
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .step-sub {
+      font-size: 1rem;
+      color: var(--muted);
+      line-height: 1.75;
+      margin-bottom: 1.6rem;
+      max-width: 100%;
+    }
+
+    /* Fields */
+    .field-group { margin-bottom: 1.2rem; }
+    .field-group:last-of-type { margin-bottom: 0; }
+
+    .field-label {
+      display: block;
+      font-size: 0.78rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+    .field-label .opt {
+      color: var(--muted);
+      font-size: 0.7rem;
+      text-transform: none;
+      letter-spacing: 0.06em;
+      margin-left: 5px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    textarea {
+      width: 100%;
+      padding: 13px 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.11);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      font-weight: 300;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    input:focus, textarea:focus {
+      border-color: var(--gold);
+      background: rgba(201,168,76,0.04);
+    }
+    input.error { border-color: rgba(255,80,80,0.55); }
+    input::placeholder, textarea::placeholder { color: var(--muted); }
+
+    textarea { resize: vertical; min-height: 90px; }
+
+    /* Toggle: Külső / Belső */
+    .toggle-wrap {
+      display: flex;
+      gap: 10px;
+    }
+    .toggle-opt {
+      flex: 1;
+      padding: 13px 16px;
+      border: 1px solid rgba(255,255,255,0.11);
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 300;
+      color: var(--text);
+      text-align: center;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
+      user-select: none;
+    }
+    .toggle-opt:hover { border-color: var(--gold); }
+    .toggle-opt.sel {
+      border-color: var(--gold);
+      background: var(--gold-dim);
+      color: var(--gold);
+    }
+
+    /* Two-col row */
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    /* Buttons */
+    .step-actions {
+      margin-top: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .btn-next {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 36px;
+      border: 1px solid var(--gold);
+      border-radius: 10px;
+      color: var(--gold);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 400;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.25s, color 0.25s;
+    }
+    .btn-next:hover { background: var(--gold); color: var(--black); }
+    .btn-next.primary { background: var(--gold); color: var(--black); }
+    .btn-next.primary:hover { background: #d4b86a; }
+
+    .btn-back {
+      background: none; border: none; cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0;
+      transition: color 0.2s;
+    }
+    .btn-back:hover { color: var(--text); }
+
+    .submit-note {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 10px;
+      opacity: 0.7;
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 680px) {
+      body { overflow: auto; height: auto; }
+      #split { grid-template-columns: 1fr; }
+      #img-col { height: 220px; }
+      #form-col { padding: 32px 24px 60px; }
+    }
+
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: var(--black); }
+    ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <a href="index.html">
+    <img src="branding/LOGO ONLY - BIMAXIM.svg" alt="bimaxim" class="logo-img">
+  </a>
+  <span class="step-meta" id="step-meta"
+        data-hu="3 lépés · ~30 mp" data-en="3 steps · ~30 sec">3 lépés · ~30 mp</span>
+  <div class="lang">
+    <button class="lbtn on" id="btn-hu" onclick="setLang('hu')">HU</button>
+    <span class="lsep">/</span>
+    <button class="lbtn" id="btn-en" onclick="setLang('en')">EN</button>
+  </div>
+</div>
+
+<!-- PROGRESS BAR -->
+<div id="progress-bar"><div id="progress-fill"></div></div>
+
+<!-- SPLIT -->
+<div id="split">
+
+  <!-- LEFT: images -->
+  <div id="img-col">
+    <img class="step-img active" id="img1" src="flowchart/01.png" alt="">
+    <img class="step-img"        id="img2" src="flowchart/02.png" alt="">
+    <img class="step-img"        id="img3" src="flowchart/03.png" alt="">
+    <span class="img-step-label" id="img-label"
+          data-hu="1 / 3 lépés" data-en="Step 1 of 3">1 / 3 lépés</span>
+    <div class="img-step-dots">
+      <div class="img-dot on" id="dot1"></div>
+      <div class="img-dot"    id="dot2"></div>
+      <div class="img-dot"    id="dot3"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: form steps -->
+  <div id="form-col">
+    <div id="steps-wrap">
+
+      <!-- STEP 1: Email -->
+      <div class="step active" id="step1">
+        <span class="step-number" data-hu="01 / 03" data-en="01 / 03">01 / 03</span>
+        <h1 class="step-title"
+            data-hu="Megmutatom, hogyan nézne ki az épületed fényben."
+            data-en="I'll show you how your building looks in light.">
+          Megmutatom, hogyan nézne ki az épületed fényben.
+        </h1>
+        <p class="step-sub"
+           data-hu="Képzeld el, hogy az épületed homlokzata megelevenedik – fény, mozgás, történet. Ingyen, 48 órán belül."
+           data-en="Imagine your building's façade coming alive – light, motion, story. Free, within 48 hours.">
+          Képzeld el, hogy az épületed homlokzata megelevenedik – fény, mozgás, történet. Ingyen, 48 órán belül.
+        </p>
+        <div class="field-group">
+          <label class="field-label" for="f-email" data-hu="Email cím" data-en="Email address">Email cím</label>
+          <input type="email" id="f-email" placeholder="email@cimed.hu"
+                 data-ph-hu="email@cimed.hu" data-ph-en="your@email.com">
+        </div>
+        <div class="step-actions">
+          <button class="btn-next" id="btn1"
+                  data-hu="TOVÁBB →" data-en="NEXT →">TOVÁBB →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Building -->
+      <div class="step" id="step2">
+        <span class="step-number" data-hu="02 / 03" data-en="02 / 03">02 / 03</span>
+        <h2 class="step-title"
+            data-hu="Melyik épületre készítsem el a látványtervet?"
+            data-en="Which building should I visualise?">
+          Melyik épületre készítsem el a látványtervet?
+        </h2>
+        <div class="field-group">
+          <label class="field-label" for="f-nev" data-hu="Épület neve" data-en="Building name">Épület neve</label>
+          <input type="text" id="f-nev"
+                 placeholder="pl. Zsámbéki romtemplom, MOM Kulturális Központ"
+                 data-ph-hu="pl. Zsámbéki romtemplom, MOM Kulturális Központ"
+                 data-ph-en="e.g. Zsámbék ruined church, MOM Cultural Centre">
+        </div>
+        <div class="field-group">
+          <label class="field-label" data-hu="Épület típusa" data-en="Building type">Épület típusa</label>
+          <div class="toggle-wrap">
+            <div class="toggle-opt sel" id="t-kulso"
+                 data-hu="🏛️ Külső homlokzat" data-en="🏛️ Exterior façade">🏛️ Külső homlokzat</div>
+            <div class="toggle-opt" id="t-belso"
+                 data-hu="🏠 Belső tér" data-en="🏠 Interior space">🏠 Belső tér</div>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="f-cim" data-hu="Épület címe" data-en="Building address">Épület címe</label>
+          <input type="text" id="f-cim"
+                 placeholder="pl. 2072 Zsámbék, Templom tér 1."
+                 data-ph-hu="pl. 2072 Zsámbék, Templom tér 1."
+                 data-ph-en="e.g. 1 Church Square, Zsámbék">
+        </div>
+        <div class="step-actions">
+          <button class="btn-next" id="btn2"
+                  data-hu="TOVÁBB →" data-en="NEXT →">TOVÁBB →</button>
+          <button class="btn-back" id="back2"
+                  data-hu="← Vissza" data-en="← Back">← Vissza</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Optional -->
+      <div class="step" id="step3">
+        <span class="step-number" data-hu="03 / 03" data-en="03 / 03">03 / 03</span>
+        <h2 class="step-title"
+            data-hu="Még egy-két részlet."
+            data-en="Just a couple more details.">
+          Még egy-két részlet.
+        </h2>
+        <p class="step-sub"
+           data-hu="Teljesen opcionális, de segít a tervezésben."
+           data-en="Completely optional, but helps me plan.">
+          Teljesen opcionális, de segít a tervezésben.
+        </p>
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label" for="f-kapcsolat">
+              <span data-hu="Neved" data-en="Your name">Neved</span>
+              <span class="opt" data-hu="(nem kötelező)" data-en="(optional)">(nem kötelező)</span>
+            </label>
+            <input type="text" id="f-kapcsolat"
+                   placeholder="Kovács Péter"
+                   data-ph-hu="Kovács Péter" data-ph-en="Your name">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="f-telefon">
+              <span data-hu="Telefon" data-en="Phone">Telefon</span>
+              <span class="opt" data-hu="(nem kötelező)" data-en="(optional)">(nem kötelező)</span>
+            </label>
+            <input type="tel" id="f-telefon"
+                   placeholder="+36 30 123 4567"
+                   data-ph-hu="+36 30 123 4567" data-ph-en="+36 30 123 4567">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="f-megjegyzes">
+            <span data-hu="Megjegyzés" data-en="Notes">Megjegyzés</span>
+            <span class="opt" data-hu="(nem kötelező)" data-en="(optional)">(nem kötelező)</span>
+          </label>
+          <textarea id="f-megjegyzes"
+                    placeholder="pl. melyik épületrészre, milyen eseményre, dátum..."
+                    data-ph-hu="pl. melyik épületrészre, milyen eseményre, dátum..."
+                    data-ph-en="e.g. which part of the building, what event, date..."></textarea>
+        </div>
+        <div class="step-actions">
+          <button class="btn-next primary" id="btn3"
+                  data-hu="KÉREM AZ INGYENES VIZUALIZÁCIÓT →"
+                  data-en="SHOW ME THE FREE VISUALISATION →">
+            KÉREM AZ INGYENES VIZUALIZÁCIÓT →
+          </button>
+          <button class="btn-back" id="back3"
+                  data-hu="← Vissza" data-en="← Back">← Vissza</button>
+        </div>
+        <p class="submit-note"
+           data-hu="48 órán belül emailben küldöm a látványtervet."
+           data-en="I'll email you the visualisation within 48 hours.">
+          48 órán belül emailben küldöm a látványtervet.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── STATE
+  let currentStep = 1;
+  let tipusVal    = 'kulso';
+  let lang        = 'hu';
+
+  // ── LANGUAGE
+  function setLang(l) {
+    lang = l;
+    document.documentElement.lang = l;
+    document.getElementById('btn-hu').classList.toggle('on', l === 'hu');
+    document.getElementById('btn-en').classList.toggle('on', l === 'en');
+    document.querySelectorAll('[data-hu],[data-en]').forEach(el => {
+      const v = el.getAttribute('data-' + l);
+      if (v !== null) el.innerHTML = v;
+    });
+    document.querySelectorAll('[data-ph-hu],[data-ph-en]').forEach(el => {
+      const v = el.getAttribute('data-ph-' + l);
+      if (v !== null) el.placeholder = v;
+    });
+  }
+
+  // ── NAVIGATE
+  function goTo(n) {
+    const cur = document.getElementById('step' + currentStep);
+
+    // Animate out
+    cur.classList.add('out');
+    setTimeout(() => {
+      cur.classList.remove('active', 'out');
+      currentStep = n;
+      const next = document.getElementById('step' + n);
+      next.classList.add('active');
+      updateUI();
+    }, 280);
+  }
+
+  function updateUI() {
+    // Progress bar
+    document.getElementById('progress-fill').style.width = (currentStep / 3 * 100) + '%';
+
+    // Images
+    [1,2,3].forEach(i => {
+      document.getElementById('img' + i).classList.toggle('active', i === currentStep);
+      document.getElementById('dot' + i).classList.toggle('on',     i === currentStep);
+    });
+
+    // Image label
+    const labels = { hu: ['1 / 3 lépés','2 / 3 lépés','3 / 3 lépés'], en: ['Step 1 of 3','Step 2 of 3','Step 3 of 3'] };
+    document.getElementById('img-label').textContent = labels[lang][currentStep - 1];
+
+    // Focus first visible input
+    const activeStep = document.getElementById('step' + currentStep);
+    const firstInput = activeStep.querySelector('input, textarea');
+    if (firstInput) setTimeout(() => firstInput.focus(), 320);
+  }
+
+  // ── VALIDATION
+  function validateStep(n) {
+    let ok = true;
+    if (n === 1) {
+      const el = document.getElementById('f-email');
+      el.classList.remove('error');
+      if (!el.value.trim() || !el.value.includes('@')) { el.classList.add('error'); el.focus(); ok = false; }
+    }
+    if (n === 2) {
+      ['f-nev','f-cim'].forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.remove('error');
+        if (!el.value.trim()) { el.classList.add('error'); if (ok) el.focus(); ok = false; }
+      });
+    }
+    return ok;
+  }
+
+  // ── BUTTON EVENTS
+  document.getElementById('btn1').addEventListener('click', () => {
+    if (validateStep(1)) goTo(2);
+  });
+  document.getElementById('btn2').addEventListener('click', () => {
+    if (validateStep(2)) goTo(3);
+  });
+  document.getElementById('back2').addEventListener('click', () => goTo(1));
+  document.getElementById('back3').addEventListener('click', () => goTo(2));
+
+  document.getElementById('btn3').addEventListener('click', () => {
+    window.location.href = 'thank-you.html';
+  });
+
+  // Enter key advances
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    if (e.target.tagName === 'TEXTAREA') return;
+    if (currentStep === 1) document.getElementById('btn1').click();
+    else if (currentStep === 2) document.getElementById('btn2').click();
+  });
+
+  // ── TOGGLE: épület típusa
+  document.getElementById('t-kulso').addEventListener('click', () => {
+    tipusVal = 'kulso';
+    document.getElementById('t-kulso').classList.add('sel');
+    document.getElementById('t-belso').classList.remove('sel');
+  });
+  document.getElementById('t-belso').addEventListener('click', () => {
+    tipusVal = 'belso';
+    document.getElementById('t-belso').classList.add('sel');
+    document.getElementById('t-kulso').classList.remove('sel');
+  });
+
+  // ── INIT
+  updateUI();
+  setTimeout(() => document.getElementById('f-email').focus(), 100);
+</script>
+</body>
+</html>

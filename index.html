@@ -578,11 +578,15 @@
     .step-d { font-size: 16px; color: var(--muted); line-height: 1.7; opacity: 0.75; max-width: 280px; margin: 0 auto; }
 
     /* ── LEAD MAGNET ── */
+    @keyframes lead-pulse {
+      0%, 100% { box-shadow: 0 0 10px rgba(201,168,76,0.3), 0 4px 24px rgba(201,168,76,0.15); }
+      50%       { box-shadow: 0 0 28px rgba(201,168,76,0.65), 0 4px 32px rgba(201,168,76,0.3); }
+    }
     #lead {
       padding: clamp(80px,11vw,140px) clamp(20px,5vw,80px);
-      background: var(--surface);
-      border-top: 1px solid var(--gold-border);
-      border-bottom: 1px solid var(--gold-border);
+      background: #1C1A0F;
+      border-top: 1px solid rgba(201,168,76,0.15);
+      border-bottom: 1px solid rgba(201,168,76,0.15);
       text-align: center;
     }
     .lead-h {
@@ -591,13 +595,26 @@
       font-size: clamp(2rem,4vw,3rem);
       margin-bottom: 16px;
     }
-    .lead-s { color: var(--muted); font-size: clamp(1rem,1.2vw,1.0625rem); line-height: 1.7; letter-spacing: 0; margin-bottom: 20px; }
-    .lead-form {
-      display: flex;
-      max-width: 560px;
-      margin: 0 auto 52px;
+    .lead-s { color: var(--muted); font-size: clamp(1rem,1.2vw,1.0625rem); line-height: 1.7; letter-spacing: 0; margin-bottom: 32px; max-width: 600px; margin-left: auto; margin-right: auto; }
+    .lead-cta-btn {
+      display: inline-block;
+      padding: 16px 44px;
+      border: none;
+      border-radius: 12px;
+      color: #1A1A1A;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.75rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      background: var(--gold); cursor: pointer;
+      text-decoration: none;
+      animation: lead-pulse 2.8s ease-in-out infinite;
+      transition: background 0.25s;
     }
-    @media(max-width:560px) { .lead-form { flex-direction: column; gap: 10px; } }
+    .lead-cta-btn:hover {
+      background: #D4B86A;
+      animation: none;
+      box-shadow: 0 0 32px rgba(201,168,76,0.5);
+    }
     .lead-in {
       flex: 1;
       padding: 13px 18px;
@@ -1025,24 +1042,17 @@
     Minden épületnek van története. Mi a tied?
   </h2>
   <p class="lead-s reveal d2"
-     data-hu="Küld el a helyszín nevét és címét — 48 órán belül elkészítem az ingyenes látványtervet."
-     data-en="Send me your building's name and address — I'll create a free visualisation within 48 hours.">
-    Küld el a helyszín nevét és címét — 48 órán belül elkészítem az ingyenes látványtervet.
+     data-hu="Küld el a helyszín nevét és címét, 48 órán belül elkészítem az ingyenes látványtervet."
+     data-en="Send me your building's name and address, I'll create a free visualisation within 48 hours.">
+    Küld el a helyszín nevét és címét, 48 órán belül elkészítem az ingyenes látványtervet.
   </p>
-  <div class="lead-form reveal d2" id="lead-form-wrap">
-    <input type="email" class="lead-in" id="lead-email"
-           placeholder="email@cimed.hu"
-           data-ph-hu="email@cimed.hu"
-           data-ph-en="your@email.com">
-    <button class="lead-btn" id="lead-btn"
-            data-hu="KÉREM AZ INGYENES LÁTVÁNYTERVET"
-            data-en="SHOW ME MY BUILDING">KÉREM AZ INGYENES LÁTVÁNYTERVET</button>
+  <div class="reveal d2" style="margin-bottom: 56px;">
+    <a href="latvanytervkeres.html" class="lead-cta-btn"
+       data-hu="KÉREM AZ INGYENES LÁTVÁNYTERVET"
+       data-en="SHOW ME THE FREE VISUALISATION">
+      KÉREM AZ INGYENES LÁTVÁNYTERVET
+    </a>
   </div>
-  <p id="lead-ok"
-     data-hu="Köszönöm! Hamarosan írok."
-     data-en="Thank you! I'll be in touch soon.">
-    Köszönöm! Hamarosan írok.
-  </p>
   <div class="lead-flow reveal d3" id="lead-flow">
     <div class="flow-step">
       <div class="flow-img-wrap">
@@ -1423,23 +1433,7 @@
   loadScene(0, false);
   rafId = requestAnimationFrame(autoTick);
 
-  // ═══════════════════════════════════════ LEAD MAGNET
-  (function() {
-    const inp = document.getElementById('lead-email');
-    const btn = document.getElementById('lead-btn');
-
-    function submit() {
-      if (!inp.value.trim() || !inp.value.includes('@')) {
-        inp.style.borderColor = 'rgba(255,80,80,0.55)';
-        inp.focus();
-        return;
-      }
-      window.location.href = 'thank-you.html';
-    }
-
-    btn.addEventListener('click', submit);
-    inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
-  })();
+  // Lead CTA gomb — a href navigáció kezeli, nincs külön JS szükséges
 
   // ═══════════════════════════════════════ PROJECT SWITCHER
   (function() {
