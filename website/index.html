@@ -116,21 +116,30 @@
       min-height: 580px;
       display: flex;
       align-items: center;
-      background-image: url('poster.jpg');
-      background-size: cover;
-      background-position: center;
       justify-content: center;
       text-align: center;
       overflow: hidden;
+      background: #000;
     }
+    /* shared sizing for both hero video layers */
+    #hero-intro,
     #hero-vimeo {
       position: absolute;
       top: 50%; left: 50%;
-      /* always covers the viewport while keeping 16:9 */
       width: max(100%, 177.78vh);
       height: max(100%, 56.25vw);
       transform: translate(-50%, -50%);
       border: 0;
+    }
+    /* intro: on top, fades out when Vimeo is ready */
+    #hero-intro {
+      z-index: 1;
+      object-fit: cover;
+      opacity: 1;
+      transition: opacity 1.4s ease;
+    }
+    /* Vimeo: always underneath, revealed when intro fades */
+    #hero-vimeo {
       z-index: 0;
     }
     .hero-ov {
@@ -810,6 +819,8 @@
     ::-webkit-scrollbar-track { background: var(--black); }
     ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 2px; }
   </style>
+  <!-- Vimeo Player API — needed for play-event detection -->
+  <script src="https://player.vimeo.com/api/player.js"></script>
 </head>
 <body>
 
@@ -830,8 +841,11 @@
 
 <!-- ═══════════════════════════════════════ HERO -->
 <section id="hero">
+  <!-- Local intro plays first; Vimeo loads silently behind it -->
+  <video id="hero-intro" src="hero/intro.mp4"
+    autoplay muted playsinline preload="auto"></video>
   <iframe id="hero-vimeo"
-    src="https://player.vimeo.com/video/1176206891?background=1&autoplay=1&loop=1&muted=1&byline=0&title=0&controls=0"
+    src="https://player.vimeo.com/video/1176206891?background=1&autoplay=1&loop=1&muted=1&byline=0&title=0&controls=0&api=1"
     allow="autoplay; fullscreen; picture-in-picture"
     allowfullscreen></iframe>
   <div class="hero-ov"></div>
@@ -1150,40 +1164,50 @@
     hdr.classList.toggle('on', window.scrollY > 30);
   }, { passive: true });
 
-  // ═══════════════════════════════════════ VIMEO POSTER FADE
-  // When Vimeo video starts playing, fade out the poster image
+  // ═══════════════════════════════════════ HERO INTRO → VIMEO HANDOFF
   (function() {
-    const hero = document.getElementById('hero');
+    const intro  = document.getElementById('hero-intro');
     const iframe = document.getElementById('hero-vimeo');
-    if (!iframe || !hero) return;
+    if (!intro || !iframe) return;
 
-    // Listen for postMessage from Vimeo player
-    window.addEventListener('message', function onVimeoMsg(e) {
-      if (!e.origin.includes('vimeo.com')) return;
+    let switched = false;
+
+    function switchToVimeo() {
+      if (switched) return;
+      switched = true;
+      // Short 0.5 s buffer so Vimeo has at least one rendered frame
+      setTimeout(() => {
+        intro.style.opacity = '0';
+        setTimeout(() => { intro.style.display = 'none'; }, 1500);
+      }, 500);
+    }
+
+    // ── Vimeo ready via postMessage ───────────────────────────────
+    // Switch as soon as Vimeo confirms it's playing — don't wait for intro end
+    window.addEventListener('message', function onMsg(e) {
+      if (!String(e.origin).includes('vimeo.com')) return;
       try {
-        const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
-        // Vimeo sends event:"ready" first, then event:"play" or timeupdates
-        if (data.event === 'ready') {
-          // Ask Vimeo to notify us of play events
-          iframe.contentWindow.postMessage(JSON.stringify({method:'addEventListener',value:'play'}), 'https://player.vimeo.com');
+        const d = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+        if (d.event === 'ready') {
+          iframe.contentWindow.postMessage(
+            JSON.stringify({ method: 'addEventListener', value: 'play' }),
+            'https://player.vimeo.com'
+          );
         }
-        if (data.event === 'play') {
-          hero.style.transition = 'background-image 0s, background-color 1.2s ease';
-          hero.style.backgroundColor = 'transparent';
-          // Delay removing poster so video has a frame rendered
-          setTimeout(() => {
-            hero.style.backgroundImage = 'none';
-          }, 800);
-          window.removeEventListener('message', onVimeoMsg);
+        if (d.event === 'play') {
+          switchToVimeo();
+          window.removeEventListener('message', onMsg);
         }
-      } catch(_) {}
+      } catch (_) {}
     });
 
-    // Fallback: remove poster after 4s regardless
-    setTimeout(() => {
-      hero.style.transition = 'opacity 1s ease';
-      hero.style.backgroundImage = 'none';
-    }, 4000);
+    // ── Fallback: intro ends but Vimeo never responded (offline/blocked) ──
+    intro.addEventListener('ended', () => {
+      setTimeout(() => { if (!switched) switchToVimeo(); }, 1000);
+    });
+    intro.addEventListener('error', () => {
+      setTimeout(() => { if (!switched) switchToVimeo(); }, 500);
+    });
   })();
 
   // ═══════════════════════════════════════ INTERSECTION OBSERVER
