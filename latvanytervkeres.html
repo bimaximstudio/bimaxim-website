@@ -591,7 +591,45 @@
   document.getElementById('back2').addEventListener('click', () => goTo(1));
   document.getElementById('back3').addEventListener('click', () => goTo(2));
 
-  document.getElementById('btn3').addEventListener('click', () => {
+  document.getElementById('btn3').addEventListener('click', async () => {
+    const btn = document.getElementById('btn3');
+
+    // Collect form data
+    const formData = {
+      email:        (document.getElementById('f-email').value      || '').trim(),
+      nev:          (document.getElementById('f-kapcsolat').value  || '').trim(),
+      epuletNeve:   (document.getElementById('f-nev').value        || '').trim(),
+      epuletCime:   (document.getElementById('f-cim').value        || '').trim(),
+      epuletTipusa: tipusVal,
+      telefon:      (document.getElementById('f-telefon').value    || '').trim(),
+      megjegyzes:   (document.getElementById('f-megjegyzes').value || '').trim()
+    };
+
+    // Disable button during submit
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+
+    try {
+      const res = await fetch('/api/submit', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(formData)
+      });
+
+      if (!res.ok) {
+        console.warn('[submit] API returned', res.status);
+        // Still redirect — don't block the user
+      } else {
+        const data = await res.json();
+        if (data.errors && data.errors.length > 0) {
+          console.warn('[submit] integration errors:', data.errors);
+        }
+      }
+    } catch (err) {
+      // Network error (e.g. file:// local testing) — log & continue
+      console.warn('[submit] fetch failed (local testing?):', err.message);
+    }
+
     window.location.href = 'thank-you.html';
   });
 
