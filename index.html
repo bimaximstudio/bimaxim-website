@@ -993,7 +993,7 @@
       <h3 class="step-t" data-hu="Ingyenes konzultáció és vizualizáció" data-en="Free consultation &amp; visualisation">Ingyenes konzultáció és vizualizáció</h3>
       <p class="step-d"
          data-hu="Megismerem a helyszínt, a történetet és a célt. Készítek egy ingyenes vizualizációt az épületedre — amit a szervezőknek, partnereknek is be tudsz mutatni még az esemény előtt."
-         data-en="I get to know the venue, the story and the goal. I create a free visualisation on your building — something you can show to funders before the event.">
+         data-en="You get to show me the venue, we familiarize with the story and the goal of the event.">
         Megismerem a helyszínt, a történetet és a célt. Készítek egy ingyenes vizualizációt az épületedre — amit a szervezőknek, partnereknek is be tudsz mutatni még az esemény előtt.
       </p>
     </div>
@@ -1009,7 +1009,7 @@
       <h3 class="step-t" data-hu="Személyre szabott tartalom" data-en="Personalised content">Személyre szabott tartalom</h3>
       <p class="step-d"
          data-hu="Létrehozzuk a vizuális show-t — minden lépésben együtt haladunk. A tartalom méltó a helyszín szelleméhez, kultúrájához és történelméhez."
-         data-en="I develop the visual show — step by step, together. The content is worthy of the spirit, culture and history of the place.">
+         data-en="We develop the full visual show. The content is designed to fit the spirit, culture and history of the place.">
         Létrehozzuk a vizuális show-t — minden lépésben együtt haladunk. A tartalom méltó a helyszín szelleméhez, kultúrájához és történelméhez.
       </p>
     </div>
@@ -1024,7 +1024,7 @@
       <h3 class="step-t" data-hu="Élő show az eseményen" data-en="Live show at your event">Élő show az eseményen</h3>
       <p class="step-d"
          data-hu="Helyszíni vetítés, az épület a főszereplő. A közönségben megmarad az emlék."
-         data-en="Live projection on site — the building is the protagonist. The audience takes the memory home.">
+         data-en="Live projection on site where the building is the protagonist. The audience takes the memory home.">
         Helyszíni vetítés, az épület a főszereplő. A közönségben megmarad az emlék.
       </p>
     </div>
@@ -1152,7 +1152,7 @@
 
 <script>
   // ═══════════════════════════════════════ LANGUAGE TOGGLE
-  let lang = 'hu';
+  let lang = new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'hu';
   function setLang(l) {
     lang = l;
     document.documentElement.lang = l;
@@ -1166,7 +1166,18 @@
       const ph = el.getAttribute('data-ph-' + l);
       if (ph !== null) el.placeholder = ph;
     });
+    // Update all internal links to carry ?lang=en when EN is active
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href');
+      if (!href || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('#')) return;
+      const u = new URL(href, location.href);
+      if (l === 'en') { u.searchParams.set('lang', 'en'); }
+      else            { u.searchParams.delete('lang'); }
+      a.href = u.pathname + (u.search || '');
+    });
   }
+  // Init language on load
+  setLang(lang);
 
   // ═══════════════════════════════════════ HEADER SCROLL
   const hdr = document.getElementById('hdr');

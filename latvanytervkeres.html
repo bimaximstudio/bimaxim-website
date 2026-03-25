@@ -510,7 +510,7 @@
   // ── STATE
   let currentStep = 1;
   let tipusVal    = 'kulso';
-  let lang        = 'hu';
+  let lang        = new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'hu';
 
   // ── LANGUAGE
   function setLang(l) {
@@ -526,7 +526,17 @@
       const v = el.getAttribute('data-ph-' + l);
       if (v !== null) el.placeholder = v;
     });
+    // Carry lang param on internal links
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href');
+      if (!href || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('#')) return;
+      const u = new URL(href, location.href);
+      if (l === 'en') { u.searchParams.set('lang', 'en'); }
+      else            { u.searchParams.delete('lang'); }
+      a.href = u.pathname + (u.search || '');
+    });
   }
+  setLang(lang);
 
   // ── NAVIGATE
   function goTo(n) {
@@ -630,7 +640,7 @@
       console.warn('[submit] fetch failed (local testing?):', err.message);
     }
 
-    window.location.href = 'thank-you.html';
+    window.location.href = lang === 'en' ? 'thank-you.html?lang=en' : 'thank-you.html';
   });
 
   // Enter key advances

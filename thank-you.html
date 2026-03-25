@@ -356,7 +356,7 @@
 
 <script>
   // ── LANGUAGE TOGGLE
-  let lang = 'hu';
+  let lang = new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'hu';
   function setLang(l) {
     lang = l;
     document.documentElement.lang = l;
@@ -366,7 +366,17 @@
       const v = el.getAttribute('data-' + l);
       if (v !== null) el.innerHTML = v;
     });
+    // Carry lang param on internal links
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href');
+      if (!href || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('#')) return;
+      const u = new URL(href, location.href);
+      if (l === 'en') { u.searchParams.set('lang', 'en'); }
+      else            { u.searchParams.delete('lang'); }
+      a.href = u.pathname + (u.search || '');
+    });
   }
+  setLang(lang);
 
   // ── 48-HOUR COUNTDOWN
   const endTime = Date.now() + 48 * 60 * 60 * 1000;
