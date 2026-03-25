@@ -42,8 +42,6 @@ export default async function handler(req, res) {
           data: {
             type: 'subscription',
             attributes: {
-              list_id: 'Xy9PRV',
-              email:   email,
               custom_source: 'website-funnel',
               profile: {
                 data: {
@@ -60,6 +58,11 @@ export default async function handler(req, res) {
                     }
                   }
                 }
+              }
+            },
+            relationships: {
+              list: {
+                data: { type: 'list', id: 'Xy9PRV' }
               }
             }
           }
