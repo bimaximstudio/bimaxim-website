@@ -84,10 +84,10 @@ export default async function handler(req, res) {
 
   // ── 2. NOTION ───────────────────────────────────────────────────
   try {
-    const NOTION_KEY = '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';
-    const NOTION_DB  = 'ec01b2b5be0c406aa84a167eb74304a7';
+    const NOTION_KEY = process.env.NOTION_API_KEY || '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';
+    const NOTION_DB  = process.env.NOTION_DATABASE_ID || 'ec01b2b5be0c406aa84a167eb74304a7';
 
-    console.log('[Notion] using hardcoded key | db:', NOTION_DB);
+    console.log('[Notion] key:', NOTION_KEY.slice(0,12) + '… | db:', NOTION_DB);
 
     const nRes = await fetch('https://api.notion.com/v1/pages', {
       method:  'POST',
