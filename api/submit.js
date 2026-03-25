@@ -89,6 +89,16 @@ export default async function handler(req, res) {
 
     console.log('[Notion] key:', NOTION_KEY.slice(0,12) + '… | db:', NOTION_DB);
 
+    // Token teszt — GET /users/me
+    const testRes = await fetch('https://api.notion.com/v1/users/me', {
+      headers: {
+        'Authorization':  `Bearer ${NOTION_KEY}`,
+        'Notion-Version': '2022-06-28'
+      }
+    });
+    const testBody = await testRes.text();
+    console.log('[Notion] token test:', testRes.status, testBody.slice(0, 120));
+
     const nRes = await fetch('https://api.notion.com/v1/pages', {
       method:  'POST',
       headers: {
