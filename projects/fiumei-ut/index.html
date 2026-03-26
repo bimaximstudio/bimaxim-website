@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ázott hajában hét halott bogár ragyog — bimaxim</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #C9A84C;
+      --gold-dim: rgba(201,168,76,0.12);
+      --gold-border: rgba(201,168,76,0.28);
+      --black: #000;
+      --dark: #080808;
+      --surface: #101010;
+      --text: #f0ede8;
+      --muted: rgba(240,237,232,0.5);
+      --hh: 72px;
+      --ease: cubic-bezier(0.25,0.46,0.45,0.94);
+      --pad: clamp(20px,5vw,80px);
+      --max: 1100px;
+    }
+
+    html { scroll-behavior: smooth; font-size: 20px; }
+    body {
+      background: var(--black);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 300;
+      line-height: 1.75;
+      overflow-x: hidden;
+    }
+    img, video { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+
+    /* ── REVEAL ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.85s var(--ease), transform 0.85s var(--ease);
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+    .d1 { transition-delay: 0.1s; }
+    .d2 { transition-delay: 0.2s; }
+
+    /* ── HEADER ── */
+    #hdr {
+      position: fixed;
+      inset: 0 0 auto 0;
+      height: var(--hh);
+      z-index: 900;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--pad);
+      background: transparent;
+      border-bottom: 1px solid transparent;
+      transition: background 0.45s var(--ease), border-color 0.45s, backdrop-filter 0.45s;
+    }
+    #hdr.on {
+      background: rgba(0,0,0,0.94);
+      border-color: var(--gold-border);
+      backdrop-filter: blur(14px);
+    }
+    .logo { display: flex; align-items: center; }
+    .logo-img { height: 20px; width: auto; filter: brightness(0) invert(1); }
+    .lang { display: flex; align-items: center; gap: 6px; font-size: 13px; letter-spacing: 0.1em; }
+    .lang-btn {
+      background: none; border: none; color: var(--muted);
+      font-family: 'Outfit', sans-serif; font-size: 13px;
+      letter-spacing: 0.1em; cursor: pointer; padding: 4px 2px;
+      transition: color 0.25s;
+    }
+    .lang-btn.active { color: var(--gold); }
+    .lang-sep { color: var(--gold-border); }
+
+    /* ── HERO (loop video) ── */
+    .cs-hero {
+      position: relative;
+      height: 100svh;
+      min-height: 520px;
+      overflow: hidden;
+    }
+    .cs-hero video {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+    .cs-hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom,
+        rgba(0,0,0,0.15) 0%,
+        rgba(0,0,0,0.35) 50%,
+        rgba(0,0,0,0.82) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: clamp(32px,6vw,90px) var(--pad);
+    }
+    .cs-back {
+      position: absolute;
+      top: calc(var(--hh) + 20px);
+      left: var(--pad);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      transition: color 0.25s;
+    }
+    .cs-back:hover { color: var(--gold); }
+    .cs-back svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .cs-meta-tag {
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+    .cs-hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 5.5vw, 5.5rem);
+      font-weight: 300;
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      margin-bottom: 14px;
+      max-width: 900px;
+    }
+    .cs-hero-sub {
+      font-size: clamp(1rem, 1.5vw, 1.25rem);
+      color: var(--muted);
+      font-style: italic;
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    /* ── TAGLINE ── */
+    .cs-tagline-wrap {
+      padding: clamp(60px,9vw,130px) var(--pad);
+      max-width: var(--max);
+      margin: 0 auto;
+    }
+    .cs-tagline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.7rem, 3.2vw, 2.8rem);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.3;
+      border-left: 2px solid var(--gold);
+      padding-left: clamp(20px, 3vw, 44px);
+    }
+    .cs-tagline cite {
+      display: block;
+      margin-top: 14px;
+      font-size: clamp(0.75rem, 1vw, 0.9rem);
+      font-style: normal;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    /* ── VIMEO ── */
+    .cs-video-wrap {
+      padding: 0 var(--pad) clamp(60px,8vw,100px);
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .cs-video-ratio {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #080808;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .cs-video-ratio iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      border: none;
+    }
+
+    /* ── DIVIDER ── */
+    .cs-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.07);
+      margin: 0 var(--pad);
+    }
+
+    /* ── TWO-COL SECTION ── */
+    .cs-two-col {
+      padding: clamp(60px,8vw,110px) var(--pad);
+      max-width: var(--max);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: clamp(28px,5vw,80px);
+      align-items: start;
+    }
+    @media(max-width:680px) { .cs-two-col { grid-template-columns: 1fr; } }
+    .cs-label {
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      padding-top: 6px;
+    }
+    .cs-body-text {
+      font-size: clamp(0.95rem, 1.3vw, 1.15rem);
+      line-height: 1.85;
+      color: var(--muted);
+    }
+
+    /* ── BEFORE PHOTOS ── */
+    .cs-before-grid {
+      padding: 0 var(--pad) clamp(60px,8vw,100px);
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media(max-width:600px) { .cs-before-grid { grid-template-columns: 1fr; } }
+    .cs-before-grid img {
+      width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .cs-img-caption {
+      margin-top: 14px;
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ── PROCESS VIDEO ── */
+    .cs-process-wrap {
+      padding: clamp(60px,8vw,100px) var(--pad);
+    }
+    .cs-section-label {
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 32px;
+    }
+    .cs-process-video-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    @media(max-width: 600px) { .cs-process-video-pair { grid-template-columns: 1fr; } }
+    .cs-process-video-ratio {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      background: #080808;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .cs-process-video-ratio video {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+
+    /* ── GALLERY ── */
+    .cs-gallery-wrap {
+      padding: clamp(60px,8vw,100px) var(--pad);
+    }
+    .cs-gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    @media(max-width:600px) { .cs-gallery-grid { grid-template-columns: 1fr; } }
+    .cs-gallery-grid img {
+      width: 100%;
+      aspect-ratio: 16/10;
+      object-fit: cover;
+      border-radius: 6px;
+      transition: transform 0.6s var(--ease);
+    }
+    .cs-gallery-grid img:hover { transform: scale(1.012); }
+    .cs-gallery-grid .cs-wide {
+      grid-column: span 2;
+      aspect-ratio: 16/7;
+    }
+    @media(max-width:600px) { .cs-gallery-grid .cs-wide { grid-column: span 1; aspect-ratio: 16/10; } }
+
+    /* ── CREDITS ── */
+    .cs-credits-wrap {
+      padding: clamp(60px,8vw,100px) var(--pad);
+      max-width: var(--max);
+      margin: 0 auto;
+    }
+    .cs-credits-list {
+      margin-top: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .cs-credit-line {
+      font-size: clamp(0.82rem, 1vw, 0.9rem);
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── FOOTER CTA ── */
+    .cs-footer-cta {
+      padding: clamp(80px,10vw,140px) var(--pad);
+      text-align: center;
+      background: #1C1A0F;
+      border-top: 1px solid var(--gold-border);
+    }
+    .cs-footer-cta h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 300;
+      margin-bottom: 18px;
+    }
+    .cs-footer-cta p {
+      font-size: clamp(0.85rem, 1.1vw, 0.95rem);
+      color: var(--muted);
+      max-width: 480px;
+      margin: 0 auto 36px;
+    }
+    .cs-btn {
+      display: inline-block;
+      padding: 14px 38px;
+      background: var(--gold);
+      color: #000;
+      border: 1px solid var(--gold);
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      transition: background 0.3s, color 0.3s, opacity 0.3s;
+    }
+    .cs-btn:hover { opacity: 0.85; }
+
+    /* ── NEXT PROJECT ── */
+    .cs-next {
+      display: block;
+      position: relative;
+      overflow: hidden;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.3s;
+    }
+    .cs-next:hover { background: rgba(255,255,255,0.02); }
+    .cs-next-inner {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      padding: clamp(28px,5vw,56px) var(--pad);
+      max-width: var(--max);
+      margin: 0 auto;
+    }
+    .cs-next-thumb {
+      flex-shrink: 0;
+      width: clamp(80px, 12vw, 140px);
+      aspect-ratio: 16/10;
+      object-fit: cover;
+      border-radius: 6px;
+      opacity: 0.85;
+      transition: opacity 0.3s;
+    }
+    .cs-next:hover .cs-next-thumb { opacity: 1; }
+    .cs-next-text { flex: 1; min-width: 0; }
+    .cs-next-label {
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+    .cs-next-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.2rem, 2.4vw, 2rem);
+      font-weight: 300;
+      line-height: 1.15;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cs-next-arrow {
+      flex-shrink: 0;
+      width: 48px; height: 48px;
+      border: 1px solid var(--gold-border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .cs-next:hover .cs-next-arrow {
+      border-color: var(--gold);
+      background: var(--gold-dim);
+    }
+    .cs-next-arrow svg { width: 18px; height: 18px; color: var(--gold); }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: clamp(48px,7vw,80px) var(--pad) clamp(32px,4vw,48px);
+      border-top: 1px solid rgba(255,255,255,0.07);
+      color: var(--muted);
+    }
+    .foot-inner {
+      max-width: 560px;
+    }
+    .foot-slabel {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.6rem;
+    }
+    .foot-gline {
+      display: block;
+      width: 38px; height: 1px;
+      background: var(--gold);
+      margin: 0 0 2.2rem;
+    }
+    .foot-clinks { display: flex; flex-direction: column; gap: 14px; margin-bottom: 44px; }
+    .foot-clink {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: clamp(0.85rem, 1.1vw, 1rem);
+      transition: color 0.2s;
+    }
+    .foot-clink:hover { color: var(--gold); }
+    .foot-clabel {
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      min-width: 38px;
+    }
+    .foot-socials { display: flex; gap: 24px; margin-bottom: 48px; flex-wrap: wrap; }
+    .foot-soc {
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      transition: color 0.2s;
+    }
+    .foot-soc:hover { color: var(--gold); }
+    .foot-bottom {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding-top: 28px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .foot-logo { height: 20px; width: auto; filter: brightness(0) invert(1); opacity: 0.7; }
+    .foot-copy { font-size: 0.67rem; color: var(--muted); letter-spacing: 0.1em; }
+  </style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header id="hdr">
+  <a class="logo" href="../../index.html">
+    <img class="logo-img"
+         src="../../branding/LOGO ONLY - BIMAXIM.svg"
+         alt="bimaxim">
+  </a>
+  <div class="lang">
+    <button class="lang-btn active" id="btn-hu" onclick="setLang('hu')">HU</button>
+    <span class="lang-sep">|</span>
+    <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+  </div>
+</header>
+
+<!-- ═══ HERO (loop video) ═══ -->
+<section class="cs-hero">
+  <video autoplay loop muted playsinline>
+    <source src="../../munkak/Fiumei/fiumei showreel hero.mp4" type="video/mp4">
+  </video>
+  <a class="cs-back" href="../../index.html">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M10 12L6 8l4-4"/>
+    </svg>
+    <span data-hu="Vissza" data-en="Back">Vissza</span>
+  </a>
+  <div class="cs-hero-overlay">
+    <p class="cs-meta-tag" data-hu="Fiumei úti Sírkert · 2025 · Koncert & vetítés" data-en="Fiumei Road Cemetery · 2025 · Concert & projection">Fiumei úti Sírkert · 2025 · Koncert & vetítés</p>
+    <h1 class="cs-hero-title"
+        data-hu="Ázott hajában hét halott bogár ragyog"
+        data-en="Seven Dead Beetles Shine in Her Soaked Hair">Ázott hajában hét halott bogár ragyog</h1>
+    <p class="cs-hero-sub" data-hu="QJUB × bimaxim" data-en="QJUB × bimaxim">QJUB × bimaxim</p>
+  </div>
+</section>
+
+<!-- ═══ TAGLINE ═══ -->
+<div class="cs-tagline-wrap reveal">
+  <blockquote class="cs-tagline">
+    <span data-hu="Szinte megtestesült Radnóti a helyszínen" data-en="Radnóti almost came alive on that stage">Szinte megtestesült Radnóti a helyszínen</span>
+    <cite data-hu="— Egy néző" data-en="— A viewer">— Egy néző</cite>
+  </blockquote>
+</div>
+
+<!-- ═══ VIMEO ═══ -->
+<div class="cs-video-wrap reveal">
+  <div class="cs-video-ratio">
+    <iframe
+      src="https://player.vimeo.com/video/1177221398?autoplay=0&loop=1&title=0&byline=0&portrait=0"
+      allow="autoplay; fullscreen; picture-in-picture"
+      allowfullscreen>
+    </iframe>
+  </div>
+</div>
+
+<div class="cs-divider"></div>
+
+<!-- ═══ A HELYSZÍN ═══ -->
+<div class="cs-two-col reveal">
+  <p class="cs-label" data-hu="A helyszín" data-en="The venue">A helyszín</p>
+  <p class="cs-body-text"
+     data-hu="A Fiumei úti Sírkert nem koncerthelyszín. A Kossuth Mauzoleum homlokzata történelem, kő és csend – amit egy estére felkeltettünk. Radnóti Miklós verseit vetítettük a falakra, miközben a QJÚB zenekar élőben játszott."
+     data-en="The Fiumei Road Cemetery is not a concert venue. The Kossuth Mausoleum is history, stone and silence — that we brought to life for one night. The poems of Miklós Radnóti were projected onto the walls as the QJÚB band played live.">
+    A Fiumei úti Sírkert nem koncerthelyszín. A Kossuth Mauzoleum homlokzata történelem, kő és csend – amit egy estére felkeltettünk. Radnóti Miklós verseit vetítettük a falakra, miközben a QJÚB zenekar élőben játszott.
+  </p>
+</div>
+
+<div class="cs-before-grid">
+  <div class="reveal">
+    <img src="../../munkak/Fiumei/before daylight photo.jpg" alt="Kossuth Mauzoleum nappal">
+    <p class="cs-img-caption" data-hu="A helyszín nappal" data-en="The venue by day">A helyszín nappal</p>
+  </div>
+  <div class="reveal d1">
+    <img src="../../munkak/Fiumei/before photo with outline mapping projection visible.jpg" alt="Mapping próba">
+    <p class="cs-img-caption" data-hu="Mapping próba" data-en="Mapping test">Mapping próba</p>
+  </div>
+</div>
+
+<div class="cs-divider"></div>
+
+<!-- ═══ A KIHÍVÁS ═══ -->
+<div class="cs-two-col reveal">
+  <p class="cs-label" data-hu="A kihívás" data-en="The challenge">A kihívás</p>
+  <p class="cs-body-text"
+     data-hu="A mauzóleum homlokzata szabálytalan, a közvetlen közelítés nem lehetséges. Az egész projekciós rendszert az éjszaka szűk időablakába kellett illeszteni — közönség, élőzene és vetítés egyszerre. A halottak kertje egy estére megszólalt."
+     data-en="The mausoleum façade is irregular and direct approach is impossible. The entire projection system had to fit within a narrow nighttime window — audience, live music and projection all at once. For one evening, the garden of the dead spoke.">
+    A mauzóleum homlokzata szabálytalan, a közvetlen közelítés nem lehetséges. Az egész projekciós rendszert az éjszaka szűk időablakába kellett illeszteni — közönség, élőzene és vetítés egyszerre. A halottak kertje egy estére megszólalt.
+  </p>
+</div>
+
+<div class="cs-divider"></div>
+
+<!-- ═══ PROCESS (vertical test videos side by side) ═══ -->
+<div class="cs-process-wrap">
+  <p class="cs-section-label reveal" data-hu="Vetítési próba" data-en="Projection test">Vetítési próba</p>
+  <div class="cs-process-video-pair">
+    <div class="cs-process-video-ratio reveal">
+      <video autoplay loop muted playsinline>
+        <source src="../../munkak/Fiumei/fiumei projection test short vid 9-16.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="cs-process-video-ratio reveal d1">
+      <video autoplay loop muted playsinline>
+        <source src="../../munkak/Fiumei/fiumei projection test short vid 9-16_1.mp4" type="video/mp4">
+      </video>
+    </div>
+  </div>
+</div>
+
+<div class="cs-divider"></div>
+
+<!-- ═══ GALLERY ═══ -->
+<div class="cs-gallery-wrap">
+  <p class="cs-section-label reveal" data-hu="A show" data-en="The show">A show</p>
+  <div class="cs-gallery-grid">
+    <img class="cs-wide reveal"
+         src="../../munkak/Fiumei/photos/best of/szep projekcio total.jpg"
+         alt="Fiumei — projekció">
+    <img class="reveal d1"
+         src="../../munkak/Fiumei/photos/best of/szep projekcio kozeli.jpg"
+         alt="Fiumei — közelkép">
+    <img class="reveal d2"
+         src="../../munkak/Fiumei/photos/best of/nagy feny projekcio nincs szep latszik kozonseg.jpg"
+         alt="Fiumei — közönség">
+  </div>
+</div>
+
+<div class="cs-divider"></div>
+
+<!-- ═══ CREDITS ═══ -->
+<div class="cs-credits-wrap reveal">
+  <p class="cs-section-label" data-hu="Stáb" data-en="Credits">Stáb</p>
+  <div class="cs-credits-list">
+    <p class="cs-credit-line"><span data-hu="Vizuális koncepció & projection mapping" data-en="Visual concept & projection mapping">Vizuális koncepció & projection mapping</span>: Biljarszki Maxim</p>
+    <p class="cs-credit-line"><span data-hu="Fény" data-en="Lighting">Fény</span>: Kis Lóri</p>
+    <p class="cs-credit-line"><span data-hu="Zenekar" data-en="Band">Zenekar</span>: QJÚB</p>
+    <p class="cs-credit-line"><span data-hu="Ének" data-en="Vocals">Ének</span>: Hegedűs Bori, Vecsei H. Miklós</p>
+    <p class="cs-credit-line"><span data-hu="Billentyű" data-en="Keys">Billentyű</span>: Frimmel Jakab &nbsp;|&nbsp; <span data-hu="Dob" data-en="Drums">Dob</span>: Mihalik Ábel &nbsp;|&nbsp; <span data-hu="Gitár" data-en="Guitar">Gitár</span>: Ratkóczi Huba &nbsp;|&nbsp; <span data-hu="Basszus" data-en="Bass">Basszus</span>: Paczári Viktor</p>
+  </div>
+</div>
+
+<!-- ═══ FOOTER CTA ═══ -->
+<section class="cs-footer-cta reveal">
+  <h2 data-hu="Van egy épületed?" data-en="Do you have a building?">Van egy épületed?</h2>
+  <p data-hu="Vetítési show vagy látványterv — megtaláljuk a helyszínedben rejlő történetet." data-en="A projection show or visualisation — we find the story hidden in your venue.">Vetítési show vagy látványterv — megtaláljuk a helyszínedben rejlő történetet.</p>
+  <a class="cs-btn" href="https://calendly.com/studio-bimaxim/30min" target="_blank"
+     data-hu="Foglalj ingyenes konzultációt" data-en="Book a free consultation">Foglalj ingyenes konzultációt</a>
+</section>
+
+<!-- ═══ NEXT PROJECT ═══ -->
+<a class="cs-next" href="../hortus-conclusus/index.html">
+  <div class="cs-next-inner">
+    <img class="cs-next-thumb"
+         src="../../munkak/Legbelső Kert - Hortus Conclusus/fotok/cover.jpg"
+         alt="Hortus Conclusus">
+    <div class="cs-next-text">
+      <p class="cs-next-label" data-hu="Következő projekt" data-en="Next project">Következő projekt</p>
+      <p class="cs-next-title">Hortus Conclusus</p>
+    </div>
+    <div class="cs-next-arrow">
+      <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M6 4l6 5-6 5"/>
+      </svg>
+    </div>
+  </div>
+</a>
+
+<footer>
+  <div class="foot-inner">
+    <span class="foot-slabel" data-hu="Kapcsolat" data-en="Contact">Kapcsolat</span>
+    <span class="foot-gline"></span>
+    <div class="foot-clinks">
+      <a href="mailto:studio@bimaxim.com" class="foot-clink">
+        <span class="foot-clabel">Email</span>studio@bimaxim.com
+      </a>
+      <a href="https://bimaxim.com" target="_blank" rel="noopener" class="foot-clink">
+        <span class="foot-clabel">Web</span>bimaxim.com
+      </a>
+    </div>
+    <div class="foot-socials">
+      <a href="https://www.instagram.com/bimaxim" target="_blank" rel="noopener" class="foot-soc">Instagram</a>
+      <a href="https://www.linkedin.com/in/bimaxim/" target="_blank" rel="noopener" class="foot-soc">LinkedIn</a>
+      <a href="https://www.youtube.com/bimaxim" target="_blank" rel="noopener" class="foot-soc">YouTube</a>
+    </div>
+    <div class="foot-bottom">
+      <img src="../../branding/LOGO ONLY - BIMAXIM.svg" alt="bimaxim" class="foot-logo">
+      <span class="foot-copy">© 2026 bimaxim</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ── HEADER SCROLL ──
+  const hdr = document.getElementById('hdr');
+  window.addEventListener('scroll', () => {
+    hdr.classList.toggle('on', window.scrollY > 20);
+  }, { passive: true });
+
+  // ── LANGUAGE ──
+  let lang = localStorage.getItem('lang') || 'hu';
+  function setLang(l) {
+    lang = l;
+    localStorage.setItem('lang', l);
+    document.getElementById('btn-hu').classList.toggle('active', l === 'hu');
+    document.getElementById('btn-en').classList.toggle('active', l === 'en');
+    document.querySelectorAll('[data-hu],[data-en]').forEach(el => {
+      const txt = l === 'hu' ? el.dataset.hu : el.dataset.en;
+      if (txt !== undefined) el.textContent = txt;
+    });
+  }
+  setLang(lang);
+
+  // ── REVEAL ──
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

@@ -464,7 +464,21 @@
       color: var(--muted);
       line-height: 1.7;
       max-width: 460px;
+      margin-bottom: 28px;
     }
+    .proj-cs-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      border-bottom: 1px solid var(--gold-border);
+      padding-bottom: 3px;
+      transition: border-color 0.25s, gap 0.25s;
+    }
+    .proj-cs-link:hover { border-color: var(--gold); gap: 12px; }
 
     /* Tab bar — flush below image/text block */
     .proj-tabs-wrap {
@@ -945,7 +959,7 @@
 <!-- ═══════════════════════════════════════ PROJECT SWITCHER -->
 <section id="gallery">
   <div class="gallery-header reveal">
-    <span class="slabel" data-hu="MUNKÁK" data-en="WORKS">MUNKÁK</span>
+    <span class="slabel" data-hu="VÁLOGATOTT MUNKÁK" data-en="SELECTED WORKS">VÁLOGATOTT MUNKÁK</span>
     <span class="gline"></span>
     <h2 class="sec-title"
         data-hu="Az épületek mesélnek"
@@ -966,6 +980,10 @@
         <p class="proj-location" id="proj-location"></p>
         <h3 class="proj-title"  id="proj-title"></h3>
         <p class="proj-desc"    id="proj-desc"></p>
+        <a class="proj-cs-link" id="proj-cs-link" href="#">
+          <span id="proj-cs-label" data-hu="Case study" data-en="Case study">Case study</span>
+          <span>→</span>
+        </a>
       </div>
     </div>
     <div class="proj-tabs-wrap">
@@ -1191,6 +1209,13 @@
     const iframe = document.getElementById('hero-vimeo');
     if (!intro || !iframe) return;
 
+    // file:// protokollon a Vimeo nem működik — intro loopolja magát, Vimeo rejtve marad
+    if (location.protocol === 'file:') {
+      intro.loop = true;
+      iframe.style.display = 'none';
+      return;
+    }
+
     let switched = false;
 
     function switchToVimeo() {
@@ -1204,7 +1229,6 @@
     }
 
     // ── Vimeo ready via postMessage ───────────────────────────────
-    // Switch as soon as Vimeo confirms it's playing — don't wait for intro end
     window.addEventListener('message', function onMsg(e) {
       if (!String(e.origin).includes('vimeo.com')) return;
       try {
@@ -1224,7 +1248,7 @@
 
     // ── Fallback: intro ends but Vimeo never responded (offline/blocked) ──
     intro.addEventListener('ended', () => {
-      setTimeout(() => { if (!switched) switchToVimeo(); }, 1000);
+      setTimeout(() => { if (!switched) intro.play(); }, 200); // loop fallback
     });
     intro.addEventListener('error', () => {
       setTimeout(() => { if (!switched) switchToVimeo(); }, 500);
@@ -1456,15 +1480,28 @@
         location_en: 'Zsámbék ruined church, Hungary',
         desc_hu:     '700 éves romtemplom homlokzata projection mapping show helyszíneként éledt újjá. Az épület saját történetét mesélte el fénnyel és animációval — zenei élőshow kíséretében.',
         desc_en:     'The façade of a 700-year-old ruined church came to life as a projection mapping stage, telling its own story through light and animation — accompanied by a live music show.',
+        url:         'projects/hortus-conclusus/index.html',
         images:      [
-          'munkak/01/2025-09-28-Zsambek-008.jpg',
-          'munkak/01/2025-09-28-Zsambek-010.jpg',
-          'munkak/01/2025-09-28-Zsambek-020.jpg',
-          'munkak/01/2025-09-28-Zsambek-024.jpg',
-          'munkak/01/2025-09-28-Zsambek-027.jpg',
-          'munkak/01/2025-09-28-Zsambek-065.jpg',
-          'munkak/01/2025-09-28-Zsambek-067.jpg',
-          'munkak/01/2025-09-28-Zsambek-087.jpg',
+          'munkak/Legbelső Kert - Hortus Conclusus/fotok/cover.jpg',
+          'munkak/Legbelső Kert - Hortus Conclusus/fotok/best of/01.jpg',
+          'munkak/Legbelső Kert - Hortus Conclusus/fotok/best of/03.jpg',
+          'munkak/Legbelső Kert - Hortus Conclusus/fotok/best of/04.jpg',
+          'munkak/Legbelső Kert - Hortus Conclusus/fotok/best of/06.jpg',
+        ]
+      },
+      {
+        title_hu:    'Ázott hajában hét halott bogár ragyog',
+        title_en:    'Seven Dead Beetles Shine in Her Soaked Hair',
+        location_hu: 'Fiumei úti Sírkert, Kossuth Mauzoleum',
+        location_en: 'Fiumei Road Cemetery, Kossuth Mausoleum',
+        desc_hu:     'A Kossuth Mauzoleum homlokzata történelem, kő és csend – amit egy estére felkeltettünk. Radnóti versei, QJÚB zene, élő vetítés a sírkertben.',
+        desc_en:     'The Kossuth Mausoleum is history, stone and silence — that we brought to life for one night. Radnóti\'s poetry, QJÚB music, live projection in the cemetery.',
+        url:         'projects/fiumei-ut/index.html',
+        images:      [
+          'munkak/Fiumei/cover.jpg',
+          'munkak/Fiumei/photos/best of/szep projekcio total.jpg',
+          'munkak/Fiumei/photos/best of/szep projekcio kozeli.jpg',
+          'munkak/Fiumei/photos/best of/nagy feny projekcio nincs szep latszik kozonseg.jpg',
         ]
       }
     ];
@@ -1479,6 +1516,7 @@
     const locEl   = document.getElementById('proj-location');
     const titleEl = document.getElementById('proj-title');
     const descEl  = document.getElementById('proj-desc');
+    const csLink  = document.getElementById('proj-cs-link');
 
     function buildList() {
       tabsEl.innerHTML = '';
@@ -1501,6 +1539,7 @@
       locEl.textContent   = lang === 'hu' ? p.location_hu : p.location_en;
       titleEl.textContent = lang === 'hu' ? p.title_hu    : p.title_en;
       descEl.textContent  = lang === 'hu' ? p.desc_hu     : p.desc_en;
+      if (csLink) csLink.href = p.url || '#';
 
       if (animate) {
         frontEl.style.transition = 'none';
@@ -1549,6 +1588,7 @@
       locEl.textContent   = l === 'hu' ? p.location_hu : p.location_en;
       titleEl.textContent = l === 'hu' ? p.title_hu    : p.title_en;
       descEl.textContent  = l === 'hu' ? p.desc_hu     : p.desc_en;
+      if (csLink) csLink.href = p.url || '#';
     };
 
     buildList();
