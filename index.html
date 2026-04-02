@@ -141,6 +141,8 @@
     /* Vimeo: always underneath, revealed when intro fades */
     #hero-vimeo {
       z-index: 0;
+      opacity: 0;
+      transition: opacity 1.4s ease;
     }
     .hero-ov {
       position: absolute;
@@ -445,19 +447,23 @@
       padding: clamp(12px,2vw,28px) 0;
     }
     .proj-location {
-      font-size: 12px;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 16px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+      font-weight: 300;
+      color: var(--text);
+      line-height: 1.15;
+      letter-spacing: 0;
+      margin-bottom: 10px;
     }
     .proj-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1.5rem,2.5vw,2rem);
-      font-weight: 300;
-      line-height: 1.15;
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(0.7rem, 0.9vw, 0.78rem);
+      font-weight: 400;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--gold);
+      line-height: 1.4;
       margin-bottom: 22px;
-      letter-spacing: 0.01em;
     }
     .proj-desc {
       font-size: clamp(1rem,1.2vw,1.0625rem);
@@ -490,35 +496,67 @@
     }
     .proj-tabs {
       display: flex;
+      justify-content: center;
       overflow-x: auto;
       scrollbar-width: none;
       padding-bottom: clamp(56px,8vw,100px);
     }
     .proj-tabs::-webkit-scrollbar { display: none; }
     .proj-tab {
+      position: relative;
       display: flex;
-      align-items: baseline;
-      gap: 8px;
-      padding: 20px 40px 16px 0;
+      align-items: center;
+      gap: 10px;
+      padding: 18px 0 16px;
+      padding-right: 40px;
       cursor: pointer;
-      color: var(--muted);
-      font-size: 0.78rem;
-      letter-spacing: 0.06em;
-      border-bottom: 1.5px solid transparent;
-      transition: color 0.15s, border-color 0.15s;
+      user-select: none;
       white-space: nowrap;
       flex-shrink: 0;
-      margin-bottom: -1px;
+      border-bottom: 1.5px solid transparent;
+      transition: border-color 0.25s;
     }
-    .proj-tab:hover { color: rgba(240,237,232,0.65); }
-    .proj-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
-    .proj-tab-num {
+    .proj-tab.active { border-bottom-color: var(--gold); }
+
+    /* numbered pill */
+    .proj-tab-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: 1.5px solid var(--gold-border);
       font-family: 'Cormorant Garamond', serif;
-      font-size: 0.95rem;
-      opacity: 0.45;
-      transition: opacity 0.15s;
+      font-size: 1rem;
+      color: var(--muted);
+      background: transparent;
+      transition: background 0.3s, border-color 0.3s, color 0.3s, transform 0.3s;
+      flex-shrink: 0;
     }
-    .proj-tab.active .proj-tab-num { opacity: 1; }
+    .proj-tab.active .proj-tab-pill {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #000;
+    }
+    .proj-tab:not(.active):hover .proj-tab-pill {
+      border-color: var(--gold);
+      color: var(--gold);
+      transform: scale(1.08);
+    }
+
+    /* short label */
+    .proj-tab-name {
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      transition: color 0.25s;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .proj-tab.active .proj-tab-name { color: var(--gold); }
+    .proj-tab:not(.active):hover .proj-tab-name { color: var(--text); }
 
     @media(max-width:900px) {
       /* On mobile, tabs sit above the image */
@@ -528,8 +566,9 @@
         border-bottom: 1px solid rgba(255,255,255,0.07);
         margin: 0 auto clamp(20px,3vw,32px);
       }
-      .proj-tabs { padding-bottom: 0; padding-top: 0; }
-      .proj-tab  { padding-top: 0; padding-bottom: 14px; }
+      .proj-tabs { padding-bottom: 0; padding-top: 0; gap: 8px; }
+      .proj-tab  { padding-top: 14px; padding-bottom: 14px; padding-right: 16px; }
+      .proj-tab-name { display: none; }
     }
 
     /* ── MEDIUM EXPLANATION ── */
@@ -683,6 +722,33 @@
       justify-content: center;
       gap: clamp(8px,2vw,20px);
       flex-wrap: nowrap;
+    }
+    @media(max-width:640px) {
+      .lead-flow {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+      }
+      .flow-step {
+        flex: none;
+        max-width: 100%;
+        width: 100%;
+      }
+      .flow-connector {
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 0;
+      }
+      .flow-arrow {
+        display: inline-block;
+        transform: rotate(90deg);
+        font-size: 1.6rem;
+      }
+      .flow-label {
+        font-size: 0.82rem;
+      }
     }
     .flow-step {
       flex: 1;
@@ -981,7 +1047,7 @@
         <h3 class="proj-title"  id="proj-title"></h3>
         <p class="proj-desc"    id="proj-desc"></p>
         <a class="proj-cs-link" id="proj-cs-link" href="#">
-          <span id="proj-cs-label" data-hu="Case study" data-en="Case study">Case study</span>
+          <span id="proj-cs-label" data-hu="Projekt részletei" data-en="Case study">Projekt részletei</span>
           <span>→</span>
         </a>
       </div>
@@ -1086,17 +1152,6 @@
     <div class="flow-step">
       <div class="flow-img-wrap">
         <img src="flowchart/02.png" alt="Látványterv">
-      </div>
-    </div>
-    <div class="flow-connector">
-      <span class="flow-arrow">→</span>
-      <span class="flow-label"
-            data-hu="Vizuális show az épületre"
-            data-en="Visual show on your building">Vizuális show az épületre</span>
-    </div>
-    <div class="flow-step">
-      <div class="flow-img-wrap">
-        <img src="flowchart/03.png" alt="Vizuális show az épületre">
       </div>
     </div>
   </div>
@@ -1223,6 +1278,7 @@
       switched = true;
       // Short 0.5 s buffer so Vimeo has at least one rendered frame
       setTimeout(() => {
+        iframe.style.opacity = '1';
         intro.style.opacity = '0';
         setTimeout(() => { intro.style.display = 'none'; }, 1500);
       }, 500);
@@ -1474,6 +1530,8 @@
   (function() {
     const projects = [
       {
+        tab_hu:      'Zsámbék',
+        tab_en:      'Zsámbék',
         title_hu:    'Zsámbék — Hortus Conclusus',
         title_en:    'Zsámbék — Hortus Conclusus',
         location_hu: 'Zsámbéki romtemplom, Magyarország',
@@ -1482,16 +1540,18 @@
         desc_en:     'The façade of a 700-year-old ruined church came to life as a projection mapping stage, telling its own story through light and animation — accompanied by a live music show.',
         url:         'projects/hortus-conclusus/index.html',
         images:      [
-          'munkak/Legbelső Kert - Hortus Conclusus/fotok/cover.jpg',
-          'munkak/Legbelső Kert - Hortus Conclusus/fotok/best of/01.jpg',
-          'munkak/Legbelső Kert - Hortus Conclusus/fotok/best of/03.jpg',
-          'munkak/Legbelső Kert - Hortus Conclusus/fotok/best of/04.jpg',
-          'munkak/Legbelső Kert - Hortus Conclusus/fotok/best of/06.jpg',
+          'munkak/Legbelso Kert - Hortus Conclusus/fotok/cover.jpg',
+          'munkak/Legbelso Kert - Hortus Conclusus/fotok/best of/01.jpg',
+          'munkak/Legbelso Kert - Hortus Conclusus/fotok/best of/03.jpg',
+          'munkak/Legbelso Kert - Hortus Conclusus/fotok/best of/04.jpg',
+          'munkak/Legbelso Kert - Hortus Conclusus/fotok/best of/06.jpg',
         ]
       },
       {
         title_hu:    'Ázott hajában hét halott bogár ragyog',
-        title_en:    'Seven Dead Beetles Shine in Her Soaked Hair',
+        tab_hu:      'Fiumei',
+        tab_en:      'Fiumei',
+        title_en:    'A concert theatre on the life and poetry of Miklós Radnóti',
         location_hu: 'Fiumei úti Sírkert, Kossuth Mauzoleum',
         location_en: 'Fiumei Road Cemetery, Kossuth Mausoleum',
         desc_hu:     'A Kossuth Mauzoleum homlokzata történelem, kő és csend – amit egy estére felkeltettünk. Radnóti versei, QJÚB zene, élő vetítés a sírkertben.',
@@ -1523,8 +1583,8 @@
       projects.forEach((p, i) => {
         const tab = document.createElement('div');
         tab.className = 'proj-tab' + (i === activeIdx ? ' active' : '');
-        tab.innerHTML = '<span class="proj-tab-num">0' + (i + 1) + '</span>'
-                      + '<span class="proj-tab-name">' + (lang === 'hu' ? p.title_hu : p.title_en) + '</span>';
+        tab.innerHTML = '<span class="proj-tab-pill">0' + (i + 1) + '</span>'
+                      + '<span class="proj-tab-name">' + (lang === 'hu' ? p.tab_hu : p.tab_en) + '</span>';
         tab.addEventListener('click', () => activateProject(i));
         tabsEl.appendChild(tab);
       });
